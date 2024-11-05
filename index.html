@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiểm Tra Hình Ảnh NSFW</title>
+
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -24,7 +25,9 @@
 <body class="bg-gray-100 dark:bg-dark-bg text-gray-800 dark:text-dark-text font-sans p-6 transition-colors duration-200">
     <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-center text-gray-800 dark:text-white">Kiểm Tra Nội Dung Hình Ảnh</h1>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+                Kiểm Tra Nội Dung Hình ảnh không hợp lệ
+            </h2>
             <button id="themeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
@@ -33,10 +36,10 @@
         </div>
         
         <div class="mb-6">
-            <label for="imageInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chọn hình ảnh:</label>
-            <input type="file" id="imageInput" accept="image/*" class="hidden">
-            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md cursor-pointer hover:border-gray-400 dark:hover:border-gray-500 transition-colors duration-200" onclick="document.getElementById('imageInput').click()">
-                <div class="space-y-1 text-center">
+            <label for="imageInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chọn nhiều hình ảnh:</label>
+            <input type="file" id="imageInput" accept="image/*" multiple class="hidden">
+            <div id="dropZone" class="mt-1 flex flex-col justify-center items-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md cursor-pointer hover:border-gray-400 dark:hover:border-gray-500 transition-colors duration-200" onclick="document.getElementById('imageInput').click()">
+                <div id="uploadIcon" class="space-y-1 text-center">
                     <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -45,13 +48,10 @@
                             Tải lên hình ảnh
                         </span>
                     </div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF lên đến 10MB</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, GIF lên đến 10 ảnh, mỗi ảnh tối đa 10MB</p>
                 </div>
+                <div id="previewContainer" class="grid grid-cols-2 gap-4 mt-4"></div>
             </div>
-        </div>
-
-        <div id="imagePreview" class="mb-6 hidden">
-            <img id="preview" src="" alt="Preview" class="max-w-full h-auto rounded-lg shadow-md">
         </div>
 
         <div class="flex justify-between mb-6">
@@ -61,37 +61,26 @@
         
         <div id="result" class="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hidden"></div>
 
-        <div class="mt-10">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">Tài liệu API</h2>
-            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
-                <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-<strong class="text-indigo-600 dark:text-indigo-400">POST http://113.160.235.186:3000/cls-image</strong>
-
-<strong class="text-gray-800 dark:text-white">Body:</strong>
-- image: Tệp ảnh (JPEG)
-
-<strong class="text-gray-800 dark:text-white">Phản hồi:</strong>
-{
-    "label": 0,
-    "status": 200
-}
-
-<strong class="text-gray-800 dark:text-white">Label:</strong>
-- 0: Nếu hình ảnh có nhãn "Neutral".
-- 1: Nếu hình ảnh không có nhãn "Neutral".
-                </pre>
+        <!-- New Text Analysis Section -->
+        <div class="mt-10 border-t pt-6 border-gray-200 dark:border-gray-700">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Kiểm Tra Nội Dung Văn Bản</h2>
+            <div class="mb-4">
+                <label for="textInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nhập văn bản:</label>
+                <textarea id="textInput" rows="4" class="w-full px-3 py-2 text-gray-700 dark:text-gray-300 border rounded-lg focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 bg-white dark:bg-gray-700" placeholder="Nhập văn bản cần kiểm tra..."></textarea>
             </div>
+            <button id="checkTextButton" class="bg-indigo-600 dark:bg-indigo-500 text-white py-2 px-6 rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-indigo-400">Kiểm Tra Văn Bản</button>
+            <div id="textResult" class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hidden"></div>
         </div>
     </div>
-
     <script>
         const imageInput = document.getElementById('imageInput');
-        const imagePreview = document.getElementById('imagePreview');
-        const preview = document.getElementById('preview');
+        const previewContainer = document.getElementById('previewContainer');
         const checkButton = document.getElementById('checkButton');
         const clearButton = document.getElementById('clearButton');
         const result = document.getElementById('result');
         const themeToggle = document.getElementById('themeToggle');
+        const dropZone = document.getElementById('dropZone');
+        const uploadIcon = document.getElementById('uploadIcon');
 
         // Theme toggle functionality
         themeToggle.addEventListener('click', () => {
@@ -99,46 +88,61 @@
         });
 
         imageInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    imagePreview.classList.remove('hidden');
-                }
-                reader.readAsDataURL(file);
+            const files = e.target.files;
+            if (files.length > 0) {
+                previewContainer.innerHTML = '';
+                uploadIcon.classList.add('hidden');
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.classList.add('max-w-full', 'h-auto', 'rounded-lg', 'shadow-md');
+                        previewContainer.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                });
             }
         });
 
         checkButton.addEventListener('click', async () => {
-            const file = imageInput.files[0];
+            const files = imageInput.files;
 
-            if (!file) {
-                alert('Vui lòng chọn một hình ảnh!');
+            if (files.length === 0) {
+                alert('Vui lòng chọn ít nhất một hình ảnh!');
                 return;
             }
 
             const formData = new FormData();
-            formData.append('image', file);
+            Array.from(files).forEach(file => {
+                formData.append('images', file);
+            });
 
             try {
                 result.innerHTML = '<p class="text-gray-600 dark:text-gray-400">Đang kiểm tra...</p>';
                 result.classList.remove('hidden');
 
-                const response = await fetch('http://:3000/cls-image', {
+                const response = await fetch('http://113.160.235.186:3000/cls-image', {
                     method: 'POST',
                     body: formData
                 });
 
                 const data = await response.json();
-                const label = data.label === 0 ? 'Neutral' : 'Non-Neutral';
-                const statusColor = data.label === 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                
+                let resultHTML = '<p class="mb-2"><strong>Kết quả:</strong></p>';
+                data.results.forEach(item => {
+                    const label = item.label === 0 ? 'Neutral' : 'Non-Neutral';
+                    const statusColor = item.label === 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                    resultHTML += `
+                        <div class="mb-2">
+                            <p>Tên file: ${item.filename}</p>
+                            <p>Label: <span class="${statusColor} font-semibold">${label}</span></p>
+                        </div>
+                    `;
+                });
+                resultHTML += `<p>Status: ${data.status}</p>`;
 
-                result.innerHTML = `
-                    <p class="mb-2"><strong>Kết quả:</strong></p>
-                    <p>Label: <span class="${statusColor} font-semibold">${label}</span></p>
-                    <p>Status: ${data.status}</p>
-                `;
+                result.innerHTML = resultHTML;
             } catch (error) {
                 console.error('Error:', error);
                 result.innerHTML = '<p class="text-red-600 dark:text-red-400">Đã xảy ra lỗi khi kiểm tra hình ảnh.</p>';
@@ -147,10 +151,86 @@
 
         clearButton.addEventListener('click', () => {
             imageInput.value = '';
-            imagePreview.classList.add('hidden');
+            previewContainer.innerHTML = '';
+            uploadIcon.classList.remove('hidden');
             result.classList.add('hidden');
             result.innerHTML = '';
         });
+
+        // New Text Analysis Functionality
+        const textInput = document.getElementById('textInput');
+        const checkTextButton = document.getElementById('checkTextButton');
+        const textResult = document.getElementById('textResult');
+
+        checkTextButton.addEventListener('click', async () => {
+            const text = textInput.value.trim();
+
+            if (text.length === 0) {
+                alert('Vui lòng nhập văn bản để kiểm tra!');
+                return;
+            }
+
+            try {
+                textResult.innerHTML = '<p class="text-gray-600 dark:text-gray-400">Đang kiểm tra...</p>';
+                textResult.classList.remove('hidden');
+
+                // Replace this with your actual API endpoint for text analysis
+                const response = await fetch('http://113.160.235.186:8000/api/content_filter', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ "content": text })
+                });
+
+                const data = await response.json();
+                
+                // Assuming the API returns a 'toxic' boolean and a 'score' number
+                const isToxic = data.label;
+
+                const statusColor = isToxic ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400';
+                const status = isToxic ? 'Toxic' : 'Bình thường';
+
+                let resultHTML = `
+                    <p class="mb-2"><strong>Kết quả phân tích:</strong></p>
+                    <p>Trạng thái: <span class="${statusColor} font-semibold">${status}</span></p>
+                `;
+
+                textResult.innerHTML = resultHTML;
+            } catch (error) {
+                console.error('Error:', error);
+                textResult.innerHTML = '<p class="text-red-600 dark:text-red-400">Đã xảy ra lỗi khi kiểm tra văn bản.</p>';
+            }
+        });
     </script>
+    <!-- New API Description Section -->
+    <div class="mt-8 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">API Information</h2>
+        
+        <div class="mb-4">
+
+            <h3 class="text-lg font-medium mb-2 text-gray-700 dark:text-gray-300">Image Analysis API</h3>
+            <p class="text-gray-600 dark:text-gray-400">
+                {
+                    content : "Content"
+                }
+            </p>
+            <p class="text-gray-600 dark:text-gray-400">Endpoint: http://113.160.235.186:3000/cls-image</p>
+            <p class="text-gray-600 dark:text-gray-400">Method: POST</p>
+            <p class="text-gray-600 dark:text-gray-400">Description: Analyzes uploaded images and classifies them as Neutral or Non-Neutral.</p>
+        </div>
+        
+        <div>
+            <h3 class="text-lg font-medium mb-2 text-gray-700 dark:text-gray-300">Text Analysis API</h3>
+            <p class="text-gray-600 dark:text-gray-400">
+                {
+                    files : [FileObject]
+                }
+            </p>
+            <p class="text-gray-600 dark:text-gray-400">Endpoint: http://113.160.235.186:8000/api/content_filter</p>
+            <p class="text-gray-600 dark:text-gray-400">Method: POST</p>
+            <p class="text-gray-600 dark:text-gray-400">Description: Analyzes input text and determines if it's toxic or normal.</p>
+        </div>
+    </div>
 </body>
 </html>
